@@ -45,21 +45,16 @@ def slack_respont_oinfo(message, jobId):
     attachments = assemble_attachment("text", fieldRows)
     message.send_webapi("요청하신 " + jobId + " Log를 조회합니다", attachments)
 
-######
+
 @respond_to('occ (.*) (.*)', re.IGNORECASE)
 def slack_respont_occ(message, jobId, concurrencyNum):
-    outputRows = output_utf8(run_command(OOZIE_JOB + "-info " + jobId + " | grep -v '\-\-\-' | grep -v App"))
-    fieldRows = """"""
-    for row in outputRows:
-        fieldRows = fieldRows + row[0:120].replace("  ", " ") + "\n"
-
-    attachments = assemble_attachment("text", fieldRows)
-    message.send_webapi("요청하신 " + jobId + " Log를 조회합니다", attachments)
+    output_utf8(run_command(OOZIE_JOB + "-change " + jobId + " -value concurrency=" + concurrencyNum))
+    message.send_webapi("요청하신 " + jobId + " 의 Concurrency를 변경합니다. 변경 후 값 : " + concurrencyNum)
 
 
 @respond_to('okill (.*)', re.IGNORECASE)
 def slack_respont_okill(message, jobId):
-    outputRows = output_utf8(run_command(OOZIE_JOB + "-kill " + jobId))
+    output_utf8(run_command(OOZIE_JOB + "-kill " + jobId))
     message.send_webapi("요청하신 " + jobId + " 를 Kill 진행하였습니다")
 
 
@@ -71,12 +66,13 @@ def slack_respont_oinfo(message, jobId, jobNum):
 
 @respond_to('cpu사용량(.*)', re.IGNORECASE)
 def slack_respont_cpuutilization(message, given):
-    outputRows = output_utf8(run_command("/usr/bin/sar -u | grep -Ev 'CPU|Average' | tail -n 20 | awk '{print $1 100-$9}'"))
+    outputRows = output_utf8(run_command("/usr/bin/sar -u | grep -Ev 'CPU|Average' | tail -n 20 | awk '{print $1\" \"100-$9}'"))
     fieldRows = """"""
     image_url = IMG_URL
     for row in outputRows:
-        fieldRows = fieldRows + row.replace(":01", "        ") + "%\n"
-        image_url = image_url + row.split(":01")[1] + ","
+        if len(str(row)) != 0:
+            fieldRows = fieldRows + row.replace(":01", "        ") + "%\n"
+            image_url = image_url + row.split(" ")[1] + ","
 
     attachments = assemble_attachment("image_url", image_url[:-1], "text", fieldRows)
     message.send_webapi("요청하신 최근 3시간 Cpu 사용량을 조회합니다", attachments)
@@ -84,13 +80,15 @@ def slack_respont_cpuutilization(message, given):
 
 @respond_to('mem사용량(.*)', re.IGNORECASE)
 def slack_respont_memutilization(message, given):
-    outputRows = output_utf8(run_command("/usr/bin/sar -r | grep -Ev 'mem|Average' | tail -n 20 | awk '{print $1 $5}'"))
+    outputRows = output_utf8(run_command("/usr/bin/sar -r | grep -Ev 'mem|Average|Linux' | tail -n 20 | awk '{print $1\" \"$5}'"))
     fieldRows = """"""
+    image_url = IMG_URL
     for row in outputRows:
+        if len(str(row)) != 0:
+            fieldRows = fieldRows + row.replace(":01", "        ") + "%\n"
+            image_url = image_url + row.split(" ")[1] + ","
 
-        fieldRows = fieldRows + row.replace(":01", "        ") + "%\n"
-
-    attachments = assemble_attachment("text", fieldRows)
+    attachments = assemble_attachment("image_url", image_url[:-1], "text", fieldRows)
     message.send_webapi("요청하신 최근 3시간 Memory 사용량을 조회합니다", attachments)
 
 
