@@ -3,6 +3,7 @@
 
 from slackbot.bot import Bot
 from action import commonAction
+from action import lunchAction
 
 
 def main():
