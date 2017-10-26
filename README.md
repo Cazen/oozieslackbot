@@ -1,6 +1,6 @@
 [![PyPI](https://badge.fury.io/py/slackbot.svg)](https://pypi.python.org/pypi/slackbot)
 
-A chatbot for [Slack](https://slack.com) using [slackbot](https://github.com/lins05/slackbot)
+A chatbot for [Slack](https://slack.com) using [slackbot](https://github.com/lins05/slackbot) for mornitoring [oozie](https://github.com/apache/oozie) scheduler
 
 ## Features
 
