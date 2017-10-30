@@ -12,14 +12,14 @@ from slackbot_settings import *
 @respond_to('ocrlist', re.IGNORECASE)
 @respond_to('Coordinator(.*)', re.IGNORECASE)
 def slack_respont_ocrlist(message):
+    message.send_webapi('실행중인 Coordinator List를 조회합니다')
     outputRows = output_utf8(run_command(OOZIE_JOBS + "-jobtype coordinator -filter status=RUNNING | grep ooz"))
-    fieldList = []
+    text = """"""
     for row in outputRows:
-        fieldDict = {'title': row.split()[1].split("_201")[0], 'value': row.split()[0]}
-        fieldList.append(fieldDict)
+        text += "[" + row.split()[1].split("_201")[0] + "]    " + row.split()[0] + "\n"
 
-    attachments = assemble_attachment("fields", fieldList)
-    message.send_webapi('실행중인 Coordinator List를 조회합니다', attachments)
+    attachments = assemble_attachment("text", text)
+    message.send_webapi(text)
 
 
 @respond_to('oozcheck', re.IGNORECASE)
@@ -36,25 +36,26 @@ def slack_respont_oozcheck(message):
 @respond_to('owrlist', re.IGNORECASE)
 @respond_to('Workflow(.*)', re.IGNORECASE)
 def slack_respont_owrlist(message):
+    message.send_webapi('실행중인 Workflow List를 조회합니다')
     outputRows = output_utf8(run_command(OOZIE_JOBS + "-jobtype wf -filter status=RUNNING | grep ooz"))
-    fieldList = []
+    text = """"""
     for row in outputRows:
-        fieldDict = {'title': row.split()[1], 'value': row.split()[0]}
-        fieldList.append(fieldDict)
+        text += "[" + row.split()[1] + "]    " + row.split()[0] + "\n"
 
-    attachments = assemble_attachment("fields", fieldList)
-    message.send_webapi('실행중인 Workflow List를 조회합니다', attachments)
+    attachments = assemble_attachment("text", text)
+    message.send_webapi(text)
 
 
 @respond_to('oinfo (.*)', re.IGNORECASE)
 def slack_respont_oinfo(message, jobId):
+    message.send_webapi("요청하신 " + jobId + " Log를 조회합니다")
     outputRows = output_utf8(run_command(OOZIE_JOB + "-info " + jobId + " | grep -v '\-\-\-' | grep -v App"))
-    fieldRows = """"""
+    text = """"""
     for row in outputRows:
-        fieldRows = fieldRows + row[0:120].replace("  ", " ") + "\n"
+        text += row[0:120].replace("  ", " ") + "\n"
 
-    attachments = assemble_attachment("text", fieldRows)
-    message.send_webapi("요청하신 " + jobId + " Log를 조회합니다", attachments)
+    attachments = assemble_attachment("text", text)
+    message.send_webapi(text)
 
 
 @respond_to('occ (.*) (.*)', re.IGNORECASE)
