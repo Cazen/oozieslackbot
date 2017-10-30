@@ -22,13 +22,24 @@ def slack_respont_ocrlist(message):
     message.send_webapi('실행중인 Coordinator List를 조회합니다', attachments)
 
 
+@respond_to('oozcheck', re.IGNORECASE)
+def slack_respont_oozcheck(message):
+    message.send_webapi('OozieCheck는 실행 시 시간이 조금 걸립니다 조금만 기다려 주세요')
+    outputRows = output_utf8(run_command(OOZIE_JOBS + "-jobtype coordinator -filter status=RUNNING | awk '{system(\"oozie job --oozie http://localhost:11000/oozie -len 10000 -info \"$1)}' 2> /dev/null | grep oozie-bpse-C@ | grep -v SUCCEEDED"))
+    text = """"""
+    for row in outputRows:
+        text += row.split()[0] + "    " + row.split()[1] + "\n"
+
+    attachments = assemble_attachment("text", text)
+    message.send_webapi(text)
+
 @respond_to('owrlist', re.IGNORECASE)
 @respond_to('Workflow(.*)', re.IGNORECASE)
 def slack_respont_owrlist(message):
     outputRows = output_utf8(run_command(OOZIE_JOBS + "-jobtype wf -filter status=RUNNING | grep ooz"))
     fieldList = []
     for row in outputRows:
-        fieldDict = {'title': row.split()[1].split("RUNNING")[0], 'value': row.split()[0]}
+        fieldDict = {'title': row.split()[1], 'value': row.split()[0]}
         fieldList.append(fieldDict)
 
     attachments = assemble_attachment("fields", fieldList)
@@ -90,5 +101,6 @@ def slack_respont_memutilization(message, given):
 
     attachments = assemble_attachment("image_url", image_url[:-1], "text", fieldRows)
     message.send_webapi("요청하신 최근 3시간 Memory 사용량을 조회합니다", attachments)
+
 
 
